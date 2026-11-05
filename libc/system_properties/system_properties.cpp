@@ -27,6 +27,7 @@
  */
 
 #include "system_properties/system_properties.h"
+#include "system_properties/prop_override.h"
 
 #include <errno.h>
 #include <private/android_filesystem_config.h>
@@ -255,6 +256,11 @@ int SystemProperties::Read(const prop_info* pi, char* name, char* value) {
         " __system_property_read_callback() instead.",
         pi->name, strlen(pi->long_value()));
   }
+  const char* override_value = prop_override_lookup(pi->name);
+  if (override_value != nullptr) {
+    size_t n = strlcpy(value, override_value, PROP_VALUE_MAX);
+    return static_cast<int>(n >= PROP_VALUE_MAX ? PROP_VALUE_MAX - 1 : n);
+  }
   return SERIAL_VALUE_LEN(serial);
 }
 
@@ -262,6 +268,12 @@ void SystemProperties::ReadCallback(const prop_info* pi,
                                     void (*callback)(void* cookie, const char* name,
                                                      const char* value, uint32_t serial),
                                     void* cookie) {
+  const char* override_value = prop_override_lookup(pi->name);
+  if (override_value != nullptr) {
+    uint32_t serial = load_const_atomic(&pi->serial, memory_order_relaxed);
+    callback(cookie, pi->name, override_value, serial);
+    return;
+  }
   // Read only properties don't need to copy the value to a temporary buffer, since it can never
   // change.  We use relaxed memory order on the serial load for the same reason.
   if (is_read_only(pi->name)) {

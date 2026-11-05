@@ -31,6 +31,7 @@
 #include <async_safe/CHECK.h>
 #include <system_properties/prop_area.h>
 #include <system_properties/system_properties.h>
+#include <system_properties/prop_override.h>
 
 #include "private/bionic_defs.h"
 
@@ -85,6 +86,16 @@ void __system_property_read_callback(const prop_info* pi,
 __BIONIC_WEAK_FOR_NATIVE_BRIDGE
 int __system_property_get(const char* name, char* value) {
   return system_properties.Get(name, value);
+}
+
+// Process-local property value overrides; see
+// system_properties/prop_override.h. Platform-only (LIBC_PLATFORM).
+extern "C" void __system_property_override_add(const char* name, const char* value) {
+  prop_override_add(name, value);
+}
+
+extern "C" void __system_property_override_clear() {
+  prop_override_clear();
 }
 
 __BIONIC_WEAK_FOR_NATIVE_BRIDGE

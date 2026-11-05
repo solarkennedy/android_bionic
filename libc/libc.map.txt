@@ -1831,6 +1831,8 @@ LIBC_DEPRECATED {
 LIBC_PLATFORM {
   global:
     __system_property_add;
+    __system_property_override_add;
+    __system_property_override_clear;
     __system_property_area__; # var
     __system_property_area_init;
     __system_property_set_filename;

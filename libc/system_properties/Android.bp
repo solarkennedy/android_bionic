@@ -16,6 +16,7 @@ cc_library_static {
         "prop_area.cpp",
         "prop_info.cpp",
         "system_properties.cpp",
+        "prop_override.cpp",
     ],
     whole_static_libs: [
         "libpropertyinfoparser",
